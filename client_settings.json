@@ -1,0 +1,20 @@
+{
+  "nats_server": "8.134.142.46",
+  "subject": "to_judger",
+  "stream": "judge_status",
+  "durable": "consumer",
+
+  "endpoint": "124.223.74.196:39000",
+  "access_key": "3qc8sVa1mCuQWypM1KbM",
+  "secret_key": "b0JSy3p6790ar9AfHFHJjtZmYkUK71ze9zP2IolE",
+  "bucket_name": "oj-file",
+
+  "host": "124.223.74.196",
+  "port": 3306,
+  "user": "",
+  "password": "",
+  "new_table_database": "oj_micro",
+  "new_table_name": "testcases",
+  "old_table_database": "local_time",
+  "old_table_name": "old_cases"
+}
