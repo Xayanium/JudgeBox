@@ -8,8 +8,6 @@ import shutil
 import subprocess
 import time
 from concurrent.futures import ProcessPoolExecutor
-import nats
-from nats.errors import *
 import uvloop
 from minio import Minio, S3Error
 from minio.error import InvalidResponseError
@@ -17,8 +15,8 @@ import aiofiles
 import asyncio
 import pymysql
 from pymysql.cursors import DictCursor
-from datetime import datetime
-
+import nats
+from nats.errors import *
 
 # 将判题相关变量及方法进行封装
 class Judge:
@@ -34,7 +32,7 @@ class Judge:
         self.tmp_path = os.path.join(self.path, 'tmp')  # 临时文件夹, 用于存放判题过程中产生的数据
         # self.exec_path = os.path.join(self.tmp_path, f'{self.p_name}')
         self.data_path = os.path.join(self.path, 'problem', f'{self.p_name}')
-        self.judge_path = os.path.join(self.path, 'output', 'judge')  # 判题核心可执行文件的路径
+        self.judge_path = os.path.join(self.path, 'judge_core', 'judge')  # 判题核心可执行文件的路径
         self.proc_argv = []  # 将判题json加入列表中, 方便进程池调用
         self.result_json = {  # 判题结果json数据, 传回给后端(按照后端给定的json命名)
             'judge_id': self.judge_id,
