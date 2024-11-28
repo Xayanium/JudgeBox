@@ -1,0 +1,3 @@
+src/cJSON/*  linguist-vendored
+*.md linguist-documentation
+*.txt linguist-documentation
