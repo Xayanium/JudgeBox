@@ -14,8 +14,8 @@ int main(int argc, char* argv[]) {
     struct judgeResult judgeResult;
 
     initGlobal(&exeConfig, &limConfig, &judgeResult);
-    FILE* fp = fopen("/home/xa/PycharmProjects/Judger/log/log.txt", "a+");
-    exeConfig.logPath = fp;
+//    FILE* fp = fopen("/home/xa/PycharmProjects/Judger/log/log.txt", "a+");
+//    exeConfig.logPath = fp;
 
     if(argc < 2) {
         printf("json parse error\n");
@@ -32,6 +32,6 @@ int main(int argc, char* argv[]) {
     returnResult(exeConfig.id, &judgeResult);
 //    makeLog(INFO, exeConfig.logPath, "complete return result");
     cJSON_Delete(judgeJson);
-    fclose(fp);
+//    fclose(fp);
     return 0;
 }
