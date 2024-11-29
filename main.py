@@ -395,7 +395,7 @@ async def run_client(conf: dict):
                             judge.result_json['user_output'] = ''
                             continue
 
-                        print(judge.result_json)  # DEBUG
+                        # print(judge.result_json)  # DEBUG
                         await client.nc.publish(judge.judge_id, json.dumps(judge.result_json).encode('utf-8'))
 
                     # 判完题后清理临时文件夹中的判题数据
