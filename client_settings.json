@@ -1,20 +1,20 @@
 {
-  "nats_server": "8.134.142.46",
-  "subject": "to_judger",
-  "stream": "judge_status",
-  "durable": "consumer",
+  "nats_server": "",
+  "subject": "",
+  "stream": "",
+  "durable": "",
 
-  "endpoint": "124.223.74.196:39000",
-  "access_key": "3qc8sVa1mCuQWypM1KbM",
-  "secret_key": "b0JSy3p6790ar9AfHFHJjtZmYkUK71ze9zP2IolE",
-  "bucket_name": "oj-file",
+  "endpoint": "",
+  "access_key": "",
+  "secret_key": "",
+  "bucket_name": "",
 
-  "host": "124.223.74.196",
+  "host": "",
   "port": 3306,
   "user": "",
   "password": "",
-  "new_table_database": "oj_micro",
-  "new_table_name": "testcases",
-  "old_table_database": "local_time",
-  "old_table_name": "old_cases"
+  "new_table_database": "",
+  "new_table_name": "",
+  "old_table_database": "",
+  "old_table_name": ""
 }

@@ -3,7 +3,7 @@ project(Judge C)
 
 set(CMAKE_C_STANDARD 11)
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/output)
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/judge_core)
 
 add_executable(judge
         src/compare/std_check.c
