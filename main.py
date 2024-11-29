@@ -52,7 +52,7 @@ class Judge:
         if self.lan == 'python':
             # 将第一个参数改为自己的python所在路径
             self.exec_path = [f'/usr/bin/python3', os.path.join(self.tmp_path, f'{self.p_name}.py')]
-            with open(os.path.join(self.tmp_path, f'{self.p_name}'), 'wt') as file:
+            with open(os.path.join(self.tmp_path, f'{self.p_name}.py'), 'wt') as file:
                 file.write(judge_json['code'])
         elif self.lan == 'java':
             self.exec_path = [f'/usr/bin/java', '-Xms128m', '-Xmx128m', '-XX:+UseSerialGC', '-cp', f'{self.tmp_path}', 'Main']
@@ -395,7 +395,7 @@ async def run_client(conf: dict):
                             judge.result_json['user_output'] = ''
                             continue
 
-                        # print(judge.result_json)  # DEBUG
+                        print(judge.result_json)  # DEBUG
                         await client.nc.publish(judge.judge_id, json.dumps(judge.result_json).encode('utf-8'))
 
                     # 判完题后清理临时文件夹中的判题数据
