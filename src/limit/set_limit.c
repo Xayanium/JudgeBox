@@ -34,8 +34,9 @@ void setLimitation(struct limConfig* limConfig, struct exeConfig* exeConfig) {
     // 最大内存限制: 单位 字节
     struct rlimit maxMemory;
     maxMemory.rlim_cur = maxMemory.rlim_max = limConfig->maxMemoryLimit;
-    // 对JVM和python解释器不做虚拟内存限制, 只限制物理内存
-    if(strcmp(exeConfig->lan, "java")!=0 && strcmp(exeConfig->lan, "java")!=0) {
+    // 对JVM和python解释器和go可执行程序不做虚拟内存限制, 只限制物理内存
+    if(strcmp(exeConfig->lan, "java")!=0 && strcmp(exeConfig->lan, "java")!=0 && strcmp(exeConfig->lan, "go")!=0) {
+        printf("%s\n", exeConfig->lan);
         if(setrlimit(RLIMIT_AS, &maxMemory) != 0) {
             exit(SET_LIMIT_ERROR);
         }
@@ -62,7 +63,8 @@ void setLimitation(struct limConfig* limConfig, struct exeConfig* exeConfig) {
     // 最大进程数限制: 单位: 个
     struct rlimit maxProcess;
     maxProcess.rlim_cur = maxProcess.rlim_max = limConfig->processLimit;
-    if(strcmp(exeConfig->lan, "java")!=0) {  //对java不做进程数限制
+    //对java和go可执行程序不做进程数限制
+    if(strcmp(exeConfig->lan, "java")!=0&&strcmp(exeConfig->lan, "go")!=0) {
         if(setrlimit(RLIMIT_NPROC, &maxProcess) != 0) {
             exit(SET_LIMIT_ERROR);
         }

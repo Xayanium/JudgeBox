@@ -45,19 +45,31 @@ class Judge:
             'sample_output': '',
             'user_output': ''
         }
-        if self.lan == 'python':
-            # 将第一个参数改为自己的python所在路径
-            self.exec_path = [f'/usr/bin/python3', os.path.join(self.tmp_path, f'{self.p_name}')]
-        elif self.lan == 'java':
-            self.exec_path = [f'/usr/bin/java', '-Xms128m', '-Xmx128m', '-XX:+UseSerialGC', '-cp', f'{self.tmp_path}', 'Main']
-        else:
-            self.exec_path = [os.path.join(self.tmp_path, f'{self.p_name}')]
         # 创建tmp临时文件夹
         if not os.path.exists(self.tmp_path):
             os.makedirs(self.tmp_path)
-        # 将用户代码保存至本地
-        with open(os.path.join(self.tmp_path, f'{self.p_name}.{self.lan}'), 'wt') as file:
-            file.write(judge_json['code'])
+
+        if self.lan == 'python':
+            # 将第一个参数改为自己的python所在路径
+            self.exec_path = [f'/usr/bin/python3', os.path.join(self.tmp_path, f'{self.p_name}.py')]
+            with open(os.path.join(self.tmp_path, f'{self.p_name}'), 'wt') as file:
+                file.write(judge_json['code'])
+        elif self.lan == 'java':
+            self.exec_path = [f'/usr/bin/java', '-Xms128m', '-Xmx128m', '-XX:+UseSerialGC', '-cp', f'{self.tmp_path}', 'Main']
+            with open(os.path.join(self.tmp_path, f'Main.java'), 'wt') as file:
+                file.write(judge_json['code'])
+        else:
+            self.exec_path = [os.path.join(self.tmp_path, f'{self.p_name}')]
+            if self.lan == 'c':
+                with open(os.path.join(self.tmp_path, f'{self.p_name}.c'), 'wt') as file:
+                    file.write(judge_json['code'])
+            elif self.lan == 'cpp':
+                with open(os.path.join(self.tmp_path, f'{self.p_name}.cpp'), 'wt') as file:
+                    file.write(judge_json['code'])
+            elif self.lan == 'go':
+                with open(os.path.join(self.tmp_path, f'{self.p_name}.go'), 'wt') as file:
+                    file.write(judge_json['code'])
+
 
     def parse_judge_json(self):
         # 判题数据文件在判题机中存放路径为: {data_path}/{p_name}_{t_case}.in(out)
@@ -141,12 +153,13 @@ async def compile_code(judge: Judge):
         proc_args = (f'gcc {os.path.join(judge.tmp_path, f"{judge.p_name}.c")} -o '
                      f'{os.path.join(judge.tmp_path, f"{judge.p_name}")} -O2 -Wall')
     elif judge.lan == 'cpp':
-        proc_args = (f'g++ {os.path.join(judge.tmp_path, f"{judge.p_name}.c")} -o '
+        proc_args = (f'g++ {os.path.join(judge.tmp_path, f"{judge.p_name}.cpp")} -o '
                      f'{os.path.join(judge.tmp_path, f"{judge.p_name}")} -O2 -Wall')
     elif judge.lan == 'java':
         proc_args = f'javac {os.path.join(judge.tmp_path, "Main.java")} -d {judge.tmp_path}'
     elif judge.lan == 'go':
-        proc_args = f'go build {os.path.join(judge.tmp_path, judge.p_name)}.go'
+        proc_args = (f'go build -o {os.path.join(judge.tmp_path, f"{judge.p_name}")} '
+                     f'{os.path.join(judge.tmp_path, f"{judge.p_name}.go")}')
     else:
         return True
     # 创建子进程执行编译
@@ -156,7 +169,7 @@ async def compile_code(judge: Judge):
         print('compile successful')
         return True
     else:
-        if err.decode('utf-8').find('error') != -1:
+        if err.decode('utf-8').find('err') != -1:
             print('compile error: ', err.decode('utf-8'))
             return err.decode('utf-8')
         else:
@@ -234,6 +247,14 @@ async def return_judge_data(judge: Judge, in_path, sample_out_path, user_out_pat
             line_count += 1
             if line_count >= lim_count:
                 break
+
+
+# 返回执行用户代码时的错误信息
+async def return_error_msg(judge: Judge, err_path, err_info):
+    judge.result_json['message'] += f'{err_info}'
+    async with aiofiles.open(err_path, 'r', encoding='utf-8') as file:
+        async for line in file:
+            judge.result_json['message'] += line
 
 
 # 从mysql中读取本地判题数据和minio中判题数据的最后更新时间戳, 判断本地数据是否需要更新
@@ -342,7 +363,11 @@ async def run_client(conf: dict):
                     async for out, err in run_judge(judge.proc_argv):  # 从yield生成器中取结果
                         if err:
                             judge.result_json['result'] = 'UNKNOWN_ERROR'
-                            judge.result_json['message'] = err
+                            await return_error_msg(
+                                judge,
+                                os.path.join(judge.tmp_path, f'{judge.p_name}er_{case_id}.txt'),
+                                err
+                            )
                         else:
                             out = json.loads(out)
                             judge.result_json['case_id'] = out['test_case']
@@ -362,7 +387,7 @@ async def run_client(conf: dict):
                                 os.path.join(judge.data_path, f'{judge.p_name}_{case_id}.in'),
                                 os.path.join(judge.data_path, f'{judge.p_name}_{case_id}.out'),
                                 os.path.join(judge.tmp_path, f'{judge.p_name}_{case_id}.txt'),
-                                lim_count=50
+                                lim_count=80
                             )
                             await client.nc.publish(judge.judge_id, json.dumps(judge.result_json).encode('utf-8'))
                             judge.result_json['input_data'] = ''
@@ -381,7 +406,7 @@ async def run_client(conf: dict):
                     except Exception as err:
                         print("Error occur: ", err)
 
-            except TimeoutError:
+            except Exception:
                 continue
 
 if __name__ == '__main__':
