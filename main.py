@@ -265,11 +265,11 @@ async def update_local_data(client: Client, judge: Judge):
         cursor1.execute(sql, args)
         old_res = cursor1.fetchall()
         old_data = {x['test_group']:x['update_time'] for x in old_res}  # 将old_table结果转为字典对象,方便new_table比较更新时间
-
         sql = f"select * from {client.new_table} where problem_id=%s"
         args = (judge.problem_id)
         cursor2.execute(sql, args)
         new_res = cursor2.fetchall()
+        # print(old_data)  # DEBUG
 
         for x in new_res:
             if not x['test_group'] in old_data:  # 旧表中没有新表的时间戳, 新增本地的判题数据
@@ -302,6 +302,9 @@ async def update_local_data(client: Client, judge: Judge):
                     client.old_conn.commit()
                 except Exception as err:
                     print("Error occur: ", err)
+
+            else:  # 新旧表一致, 提交事务保持一致性
+                client.old_conn.commit()
 
 
 async def run_client(conf: dict):
@@ -406,7 +409,8 @@ async def run_client(conf: dict):
                     except Exception as err:
                         print("Error occur: ", err)
 
-            except Exception:
+            except Exception as err:
+                print("Error occur: ", err)
                 continue
 
 if __name__ == '__main__':
